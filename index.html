@@ -49,6 +49,24 @@
     .interval-wrap.visible { display:flex; }
     .interval-wrap select { background:#1d3932; color:white; border:1px solid var(--line); border-radius:10px; padding:8px 10px; font:inherit; }
     .metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .comparison-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 10px; }
+    .save-row { display:flex; gap:8px; margin-top:9px; }
+    .save-row button { flex:1; min-height:40px; font-size:12px; }
+    .saved-list { margin-top:8px; display:grid; gap:6px; }
+    .saved-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border:1px solid #ffffff12; background:#ffffff08; border-radius:11px; font-size:11px; }
+    .maze-card { margin-top:14px; padding:13px; border:1px solid #fbbf2450; border-radius:18px; background:linear-gradient(145deg,#f59e0b18,#ffffff06); }
+    .maze-title { font-size:15px; font-weight:900; margin:0 0 4px; }
+    .maze-copy { color:var(--muted); font-size:11px; line-height:1.45; margin-bottom:9px; }
+    .maze-poster { display:block; width:100%; max-height:180px; object-fit:cover; object-position:top; border-radius:12px; margin:8px 0; border:1px solid #ffffff20; }
+    .maze-select { width:100%; background:#1d3932; color:white; border:1px solid var(--line); border-radius:10px; padding:10px; font:inherit; margin-bottom:8px; }
+    #mazeCanvas { display:block; width:100%; max-width:360px; aspect-ratio:1; margin:0 auto; background:#f8fafc; border-radius:12px; touch-action:pan-y; }
+    .maze-score-row { display:flex; justify-content:space-between; gap:8px; align-items:center; font-size:12px; margin:8px 0; }
+    .maze-score { color:#fbbf24; font-weight:900; font-size:17px; }
+    .maze-controls { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; max-width:220px; margin:8px auto 0; }
+    .maze-controls button { min-height:38px; border-radius:10px; color:white; background:#ffffff12; border:1px solid var(--line); }
+    .maze-controls .up { grid-column:2; } .maze-controls .left { grid-column:1; grid-row:2; } .maze-controls .down { grid-column:2; grid-row:2; } .maze-controls .right { grid-column:3; grid-row:2; }
+    .maze-actions { display:flex; gap:7px; margin-top:8px; } .maze-actions button { flex:1; min-height:38px; font-size:12px; }
+    .saved-item button { min-height:30px; border-radius:8px; padding:0 9px; font-size:11px; color:white; background:#ffffff12; border:1px solid var(--line); }
     .metric { min-width:0; padding:10px; border-radius:15px; background:#ffffff09; border:1px solid #ffffff0e; }
     .metric-label { font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
     .metric-value { margin-top:7px; font-size:clamp(13px,3.7vw,19px); font-weight:750; letter-spacing:-.03em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
@@ -114,6 +132,13 @@
       <div class="summary-tile"><div class="summary-label">Total steps</div><div class="summary-value" id="totalSteps">0</div></div>
       <div class="summary-tile"><div class="summary-label">Route distance</div><div class="summary-value" id="totalDistance">0 <span class="summary-unit">m</span></div></div>
     </section>
+    <section class="comparison-grid" aria-label="Pace and distance comparison">
+      <div class="metric"><div class="metric-label">Speed</div><div class="metric-value" id="speedValue">0.0 <span class="metric-unit">km/h</span></div></div>
+      <div class="metric"><div class="metric-label">Pace</div><div class="metric-value" id="paceValue">— <span class="metric-unit">min/km</span></div></div>
+      <div class="metric"><div class="metric-label">Step distance*</div><div class="metric-value" id="stepDistanceValue">0 <span class="metric-unit">m</span></div></div>
+      <div class="metric"><div class="metric-label">GPS distance</div><div class="metric-value" id="gpsDistanceValue">0 <span class="metric-unit">m</span></div></div>
+    </section>
+    <div class="steps-note">*Estimated using a 0.70 m average step length; GPS distance is calculated from filtered GPS fixes.</div>
     <section class="legend" aria-label="Route visualization legend">
       <div class="legend-title" id="legendTitle">Distance between route dots</div><div class="legend-gradient" id="legendGradient"></div>
       <div class="legend-labels"><span id="legendLow">Shorter · lighter</span><span id="legendHigh">Farther · darker</span></div>
@@ -129,6 +154,26 @@
       <button class="secondary" id="stopBtn" disabled>Stop</button>
       <button class="secondary" id="recenterBtn" disabled aria-label="Center map on my location">◎</button>
     </div>
+    <div class="save-row">
+      <button class="secondary" id="saveWalkBtn" type="button">Save walk</button>
+      <button class="secondary" id="exportWalksBtn" type="button">Export walks</button>
+    </div>
+    <div class="saved-list" id="savedWalks" aria-label="Saved walks"></div>
+    <section class="maze-card" aria-label="Bonus maze challenge">
+      <div class="eyebrow">Bonus challenge</div>
+      <div class="maze-title">🧩 Maze Quest — earn extra points</div>
+      <div class="maze-copy">Explore nine themed worlds inspired by the neon maze artwork below. Guide your player from A (START) to B (FINISH) using the arrow buttons, keyboard arrows, or touchscreen swipes. Complete each world once per session to earn <strong>25 bonus points</strong>.</div>
+      <img class="maze-poster" src="maze-poster.png" alt="Nine high-quality neon fantasy mazes: Pyramid, Mayan Temple, Space, Halloween, Hexagon Magic, Rectangle Portal, Star Magic, Octagon Magic, and Oval Portal" loading="lazy">
+      <select class="maze-select" id="mazeSelect" aria-label="Choose a maze">
+        <option value="circle">🏺 Pyramid Maze</option><option value="square">🌿 Mayan Temple Maze</option><option value="triangle">🚀 Space Maze</option><option value="hexagon">🎃 Halloween Maze</option><option value="rectangle">🔮 Hexagon Magic Maze</option><option value="star">🌀 Rectangle Portal Maze</option><option value="heart">⭐ Star Magic Maze</option><option value="octagon">💎 Octagon Magic Maze</option><option value="oval">🪐 Oval Portal Maze</option>
+      </select>
+      <canvas id="mazeCanvas" width="360" height="360" aria-label="Playable maze"></canvas>
+      <div class="maze-score-row"><span id="mazeStatus" role="status">Find the path from START to FINISH.</span><span class="maze-score"><span id="mazePoints">0</span> pts</span></div>
+      <div class="maze-controls" aria-label="Maze movement controls">
+        <button class="up" data-move="up" aria-label="Move up">▲</button><button class="left" data-move="left" aria-label="Move left">◀</button><button class="down" data-move="down" aria-label="Move down">▼</button><button class="right" data-move="right" aria-label="Move right">▶</button>
+      </div>
+      <div class="maze-actions"><button class="secondary" id="showSolutionBtn" type="button" aria-pressed="false">Show solution</button><button class="secondary" id="newMazeBtn" type="button">New maze</button><button class="secondary" id="resetMazeBtn" type="button">Reset path</button></div>
+    </section>
   </main>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
@@ -142,12 +187,15 @@
       let motionActive = false, stepCount = 0, lastStepAt = 0, baseline = 9.81, filteredMagnitude = 0, olderFiltered = 0, previousFiltered = 0, lastMotionAt = 0, motionSamples = 0;
       let lastRoutePoint = null, totalDistanceMeters = 0, wakeLock = null;
       let recordingMode = 'steps', timeDotTimer = null, mapView = 'dots';
-      const routePoints = [], dotsLayer = L.layerGroup().addTo(map), routeLinesLayer = L.layerGroup().addTo(map);
-      let heatLayer = null;
+      const routePoints = [];
       const STEPS_PER_ROUTE_DOT = 5, MAX_ROUTE_ACCURACY_METERS = 25;
-      const STEP_THRESHOLD = 0.48;       // lower threshold to catch gentler walking peaks
-      const STEP_COOLDOWN_MS = 280;      // minimum interval between detected steps
+      const STEP_THRESHOLD = 0.48;
+      const STEP_COOLDOWN_MS = 280;
       const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([25.033, 121.5654], 13);
+      const dotsLayer = L.layerGroup().addTo(map), routeLinesLayer = L.layerGroup().addTo(map);
+      let heatLayer = null;
+      let gpsDistanceMeters = 0, lastDistanceFix = null, lastDistanceFixTime = 0, speedMetersPerSecond = 0;
+      const WALK_STORAGE_KEY = 'routeLabSavedWalksV1';
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
@@ -167,6 +215,81 @@
         $('totalDistance').innerHTML = totalDistanceMeters >= 1000
           ? (totalDistanceMeters / 1000).toFixed(2) + ' <span class="summary-unit">km</span>'
           : Math.round(totalDistanceMeters) + ' <span class="summary-unit">m</span>';
+        updateFitnessMetrics();
+      }
+      function formatDistance(m) {
+        return m >= 1000 ? `${(m/1000).toFixed(2)} <span class="metric-unit">km</span>` : `${Math.round(m)} <span class="metric-unit">m</span>`;
+      }
+      function updateFitnessMetrics() {
+        $('stepDistanceValue').innerHTML = formatDistance(stepCount * 0.70);
+        $('gpsDistanceValue').innerHTML = formatDistance(gpsDistanceMeters);
+        $('speedValue').innerHTML = `${(speedMetersPerSecond * 3.6).toFixed(1)} <span class="metric-unit">km/h</span>`;
+        if (speedMetersPerSecond > 0.15 && gpsDistanceMeters >= 20) {
+          const pace = 1000 / speedMetersPerSecond / 60;
+          const mins = Math.floor(pace), secs = Math.round((pace-mins)*60);
+          $('paceValue').innerHTML = `${mins}:${String(secs).padStart(2,'0')} <span class="metric-unit">min/km</span>`;
+        } else $('paceValue').innerHTML = '— <span class="metric-unit">min/km</span>';
+      }
+      function getSavedWalks() {
+        try { const value = JSON.parse(localStorage.getItem(WALK_STORAGE_KEY) || '[]'); return Array.isArray(value) ? value : []; }
+        catch (_) { return []; }
+      }
+      function renderSavedWalks() {
+        const host = $('savedWalks');
+        host.innerHTML = '';
+        const walks = getSavedWalks();
+        if (!walks.length) { host.innerHTML = '<div class="steps-note">No saved walks yet. Tap “Save walk” after or during a walk.</div>'; return; }
+        walks.slice(0,5).forEach(walk => {
+          const row = document.createElement('div'); row.className = 'saved-item';
+          const info = document.createElement('span');
+          info.textContent = `${walk.dateLabel} · ${walk.steps} steps · ${(walk.gpsDistance/1000).toFixed(2)} km GPS`;
+          const load = document.createElement('button'); load.type = 'button'; load.textContent = 'Show';
+          load.addEventListener('click', () => {
+            clearRouteLayers();
+            stepCount = walk.steps || 0; stepCountEl.textContent = stepCount.toLocaleString();
+            gpsDistanceMeters = walk.gpsDistance || 0; totalDistanceMeters = walk.routeDistance || 0;
+            routePoints.push(...(walk.points || []));
+            if (walk.points && walk.points.length) {
+              walk.points.forEach((point, i) => {
+                L.circleMarker([point[0],point[1]], {radius:6,color:'#fff',weight:2,fillColor:'#16875b',fillOpacity:1}).addTo(dotsLayer);
+                if (i) L.polyline([[walk.points[i-1][0],walk.points[i-1][1]],[point[0],point[1]]], {color:'#16875b',weight:4,opacity:.85}).addTo(routeLinesLayer);
+              });
+              map.fitBounds(L.latLngBounds(walk.points.map(p => [p[0],p[1]])), {padding:[30,30], maxZoom:17});
+            }
+            updateTotals(); updateFitnessMetrics(); updateViewUI();
+            message.textContent = `Showing saved walk from ${walk.dateLabel}. Start a new recording to continue tracking.`;
+          });
+          row.append(info, load); host.appendChild(row);
+        });
+      }
+      function clearRouteLayers() {
+        dotsLayer.clearLayers(); routeLinesLayer.clearLayers(); routePoints.length = 0;
+        if (heatLayer) heatLayer.setLatLngs(routePoints);
+        lastRoutePoint = null; totalDistanceMeters = 0;
+      }
+      function saveCurrentWalk() {
+        const walk = {
+          id: Date.now(), dateLabel: new Date().toLocaleString(), steps: stepCount,
+          gpsDistance: Math.round(gpsDistanceMeters), routeDistance: Math.round(totalDistanceMeters),
+          mode: recordingMode, points: routePoints.map(p => [p[0],p[1],p[2] || 0.75])
+        };
+        if (!walk.points.length && !walk.steps && !walk.gpsDistance) {
+          message.textContent = 'Nothing to save yet. Start tracking and walk a little first.'; return;
+        }
+        try {
+          const walks = getSavedWalks(); walks.unshift(walk);
+          localStorage.setItem(WALK_STORAGE_KEY, JSON.stringify(walks.slice(0,20)));
+          renderSavedWalks(); message.textContent = 'Walk saved on this device. Use Export walks to make a backup.';
+        } catch (_) { message.textContent = 'Could not save locally. Your browser storage may be full or disabled.'; }
+      }
+      function exportSavedWalks() {
+        const walks = getSavedWalks();
+        if (!walks.length) { message.textContent = 'There are no saved walks to export yet.'; return; }
+        const blob = new Blob([JSON.stringify(walks, null, 2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob); const a = document.createElement('a');
+        a.href = url; a.download = `route-lab-walks-${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        message.textContent = 'Saved walks exported as a JSON backup file.';
       }
       function haversine(a, b) {
         const rad = v => v * Math.PI / 180, R = 6371000;
@@ -297,6 +420,21 @@
         window.lastGpsPositionObject = position;
         const c = position.coords;
         const lat = c.latitude, lon = c.longitude, acc = c.accuracy;
+        const now = position.timestamp || Date.now();
+        if (Number.isFinite(acc) && acc <= MAX_ROUTE_ACCURACY_METERS) {
+          const current = [lat, lon];
+          if (lastDistanceFix) {
+            const delta = haversine(lastDistanceFix, current);
+            const dt = (now - lastDistanceFixTime) / 1000;
+            if (delta <= 150 && dt > 0.5) {
+              gpsDistanceMeters += delta;
+              const instantSpeed = delta / dt;
+              speedMetersPerSecond = speedMetersPerSecond * 0.65 + Math.min(instantSpeed, 4.5) * 0.35;
+            } else if (delta > 150) speedMetersPerSecond = 0;
+          }
+          lastDistanceFix = current; lastDistanceFixTime = now;
+          updateFitnessMetrics();
+        }
         lastPosition = [lat, lon];
         $('lat').textContent = lat.toFixed(6);
         $('lon').textContent = lon.toFixed(6);
@@ -468,6 +606,8 @@
           message.textContent = `Time Mode: a route dot is attempted every ${$('intervalSelect').value} seconds.`;
         }
       });
+      $('saveWalkBtn').addEventListener('click', saveCurrentWalk);
+      $('exportWalksBtn').addEventListener('click', exportSavedWalks);
       recenterBtn.addEventListener('click', () => {
         if (lastPosition) map.setView(lastPosition, Math.max(map.getZoom(), 16), { animate: true });
       });
@@ -479,9 +619,84 @@
       });
       window.addEventListener('resize', () => map.invalidateSize());
       updateTotals();
+      updateFitnessMetrics();
+      renderSavedWalks();
       updateModeUI();
       updateViewUI();
       setTimeout(() => map.invalidateSize(), 150);
+
+    // Bonus Maze Quest: each theme gets a genuine wall-based maze. A BFS solver
+    // validates the start-to-finish route and can reveal the verified solution.
+    const mazeCanvas = $('mazeCanvas'), mazeCtx = mazeCanvas.getContext('2d');
+    const mazeThemes = {
+      circle:{name:'Pyramid',color:'#f59e0b'}, square:{name:'Mayan Temple',color:'#4ade80'}, triangle:{name:'Space',color:'#a78bfa'},
+      hexagon:{name:'Halloween',color:'#fb923c'}, rectangle:{name:'Hexagon Magic',color:'#e879f9'}, star:{name:'Rectangle Portal',color:'#22d3ee'},
+      heart:{name:'Star Magic',color:'#2dd4bf'}, octagon:{name:'Octagon Magic',color:'#facc15'}, oval:{name:'Oval Portal',color:'#38bdf8'}
+    };
+    const mazeSize=13;
+    let mazeGrid=[], mazePlayer={x:0,y:0}, mazeWon=false, mazePoints=0, mazeCompleted=new Set(), mazeSolution=[], showMazeSolution=false;
+    function neighbors(x,y){
+      const c=mazeGrid[y]?.[x]; if(!c)return [];
+      const out=[];
+      if(y>0&&!c.t)out.push({x,y:y-1}); if(x<mazeSize-1&&!c.r)out.push({x:x+1,y});
+      if(y<mazeSize-1&&!c.b)out.push({x,y:y+1}); if(x>0&&!c.l)out.push({x:x-1,y});
+      return out;
+    }
+    function findMazeSolution(){
+      const start='0,0', goal=`${mazeSize-1},${mazeSize-1}`, queue=[{x:0,y:0}], previous=new Map([[start,null]]);
+      for(let i=0;i<queue.length;i++){
+        const p=queue[i], key=`${p.x},${p.y}`; if(key===goal)break;
+        for(const n of neighbors(p.x,p.y)){const nk=`${n.x},${n.y}`;if(!previous.has(nk)){previous.set(nk,key);queue.push(n);}}
+      }
+      if(!previous.has(goal))return [];
+      const path=[];let k=goal;while(k!==null){const [x,y]=k.split(',').map(Number);path.push({x,y});k=previous.get(k);}return path.reverse();
+    }
+    function generateMaze(){
+      mazeGrid=Array.from({length:mazeSize},()=>Array.from({length:mazeSize},()=>({t:true,r:true,b:true,l:true,seen:false})));
+      const stack=[{x:0,y:0}]; mazeGrid[0][0].seen=true;
+      while(stack.length){
+        const c=stack[stack.length-1],opts=[];
+        if(c.y>0&&!mazeGrid[c.y-1][c.x].seen)opts.push({x:c.x,y:c.y-1,d:'t',o:'b'});
+        if(c.x<mazeSize-1&&!mazeGrid[c.y][c.x+1].seen)opts.push({x:c.x+1,y:c.y,d:'r',o:'l'});
+        if(c.y<mazeSize-1&&!mazeGrid[c.y+1][c.x].seen)opts.push({x:c.x,y:c.y+1,d:'b',o:'t'});
+        if(c.x>0&&!mazeGrid[c.y][c.x-1].seen)opts.push({x:c.x-1,y:c.y,d:'l',o:'r'});
+        if(!opts.length){stack.pop();continue;}
+        const n=opts[Math.floor(Math.random()*opts.length)];mazeGrid[c.y][c.x][n.d]=false;mazeGrid[n.y][n.x][n.o]=false;mazeGrid[n.y][n.x].seen=true;stack.push({x:n.x,y:n.y});
+      }
+      mazeGrid.forEach(row=>row.forEach(c=>delete c.seen));
+      // A perfect maze should always be connected; validate before allowing play.
+      mazeSolution=findMazeSolution();
+      if(!mazeSolution.length){generateMaze();return;}
+      mazePlayer={x:0,y:0};mazeWon=false;showMazeSolution=false;
+      $('showSolutionBtn').textContent='Show solution';$('showSolutionBtn').setAttribute('aria-pressed','false');
+      drawMaze();$('mazeStatus').textContent=`${mazeThemes[$('mazeSelect').value]?.name||'Maze'}: follow the open corridors from A to B.`;
+    }
+    function drawMaze(){
+      const theme=mazeThemes[$('mazeSelect').value]||mazeThemes.circle,w=mazeCanvas.width,cs=w/mazeSize;
+      mazeCtx.clearRect(0,0,w,w);mazeCtx.fillStyle='#070b18';mazeCtx.fillRect(0,0,w,w);
+      // Subtle colored glow behind the actual corridors.
+      mazeCtx.strokeStyle=theme.color;mazeCtx.lineWidth=3.2;mazeCtx.lineCap='round';mazeCtx.lineJoin='round';mazeCtx.shadowColor=theme.color;mazeCtx.shadowBlur=5;
+      mazeGrid.forEach((row,y)=>row.forEach((c,x)=>{const px=x*cs,py=y*cs;mazeCtx.beginPath();if(c.t){mazeCtx.moveTo(px,py);mazeCtx.lineTo(px+cs,py);}if(c.r){mazeCtx.moveTo(px+cs,py);mazeCtx.lineTo(px+cs,py+cs);}if(c.b){mazeCtx.moveTo(px+cs,py+cs);mazeCtx.lineTo(px,py+cs);}if(c.l){mazeCtx.moveTo(px,py+cs);mazeCtx.lineTo(px,py);}mazeCtx.stroke();}));
+      mazeCtx.shadowBlur=0;
+      if(showMazeSolution&&mazeSolution.length){mazeCtx.beginPath();mazeSolution.forEach((p,i)=>{const x=(p.x+.5)*cs,y=(p.y+.5)*cs;if(i===0)mazeCtx.moveTo(x,y);else mazeCtx.lineTo(x,y);});mazeCtx.strokeStyle='#ffffff';mazeCtx.lineWidth=2.4;mazeCtx.setLineDash([4,4]);mazeCtx.stroke();mazeCtx.setLineDash([]);}
+      // Start and finish cells are clearly marked; movement still obeys corridor walls.
+      mazeCtx.fillStyle='#16a34a';mazeCtx.fillRect(2,2,cs-4,cs-4);mazeCtx.fillStyle='#dc2626';mazeCtx.fillRect(w-cs+2,w-cs+2,cs-4,cs-4);
+      mazeCtx.fillStyle='#fff';mazeCtx.font='bold 10px system-ui';mazeCtx.textAlign='center';mazeCtx.fillText('A',cs/2,cs*.66);mazeCtx.fillText('B',w-cs/2,w-cs*.68);
+      mazeCtx.beginPath();mazeCtx.arc((mazePlayer.x+.5)*cs,(mazePlayer.y+.5)*cs,cs*.27,0,Math.PI*2);mazeCtx.fillStyle='#111827';mazeCtx.fill();mazeCtx.strokeStyle='#fff';mazeCtx.lineWidth=2;mazeCtx.stroke();
+    }
+    function moveMaze(dir){if(mazeWon)return;const c=mazeGrid[mazePlayer.y]?.[mazePlayer.x];if(!c)return;
+      if(dir==='up'&&!c.t)mazePlayer.y--;else if(dir==='right'&&!c.r)mazePlayer.x++;else if(dir==='down'&&!c.b)mazePlayer.y++;else if(dir==='left'&&!c.l)mazePlayer.x--;else return;
+      if(mazePlayer.x===mazeSize-1&&mazePlayer.y===mazeSize-1){mazeWon=true;const key=$('mazeSelect').value;if(!mazeCompleted.has(key)){mazeCompleted.add(key);mazePoints+=25;$('mazePoints').textContent=mazePoints;$('mazeStatus').textContent='Maze solved! +25 bonus points 🎉';}else $('mazeStatus').textContent='Maze solved! You already earned points for this maze.';}
+      drawMaze();
+    }
+    $('showSolutionBtn').addEventListener('click',()=>{showMazeSolution=!showMazeSolution;$('showSolutionBtn').textContent=showMazeSolution?'Hide solution':'Show solution';$('showSolutionBtn').setAttribute('aria-pressed',String(showMazeSolution));drawMaze();});
+    document.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',()=>moveMaze(btn.dataset.move)));
+    window.addEventListener('keydown',e=>{if(!document.querySelector('.maze-card:hover'))return;const k={ArrowUp:'up',ArrowRight:'right',ArrowDown:'down',ArrowLeft:'left'}[e.key];if(k){e.preventDefault();moveMaze(k);}});
+    let mazeTouch=null; mazeCanvas.addEventListener('touchstart',e=>{const t=e.changedTouches[0];mazeTouch={x:t.clientX,y:t.clientY};},{passive:true});
+    mazeCanvas.addEventListener('touchend',e=>{if(!mazeTouch)return;const t=e.changedTouches[0],dx=t.clientX-mazeTouch.x,dy=t.clientY-mazeTouch.y;mazeTouch=null;if(Math.max(Math.abs(dx),Math.abs(dy))<18)return;moveMaze(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'));},{passive:true});
+    $('mazeSelect').addEventListener('change',generateMaze); $('newMazeBtn').addEventListener('click',generateMaze); $('resetMazeBtn').addEventListener('click',()=>{mazePlayer={x:0,y:0};mazeWon=false;$('mazeStatus').textContent='Try again — START to FINISH!';drawMaze();});
+    generateMaze();
+
     })();
   </script>
 </body>
