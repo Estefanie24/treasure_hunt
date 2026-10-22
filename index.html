@@ -87,13 +87,41 @@
     .pin-pulse { position:absolute; inset:0; border-radius:50%; background:#16875b30; animation:pulse 2s infinite; }
     .pin-core { position:absolute; top:8px; left:8px; width:18px; height:18px; border:4px solid white; border-radius:50%; background:#14a66b; box-shadow:0 2px 9px #17382b70; }
     @keyframes pulse { 0%{transform:scale(.7);opacity:.9} 100%{transform:scale(1.8);opacity:0} }
+    .main-menu { position:fixed; z-index:650; top:calc(82px + env(safe-area-inset-top)); left:12px; right:12px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:560px; margin:0 auto; }
+    .menu-btn { min-height:54px; padding:8px 5px; border-radius:16px; border:1px solid #ffffff35; color:#fff; background:rgba(16,35,31,.91); box-shadow:0 6px 20px #10231f30; backdrop-filter:blur(12px); font-size:12px; line-height:1.2; }
+    .menu-btn span { display:block; font-size:19px; margin-bottom:3px; }
+    .menu-btn.active { background:var(--accent); border-color:var(--accent); color:#10231f; }
+    body[data-view="map"] .panel { display:none; }
+    body[data-view="telemetry"] .maze-card { display:none; }
+    body[data-view="maze"] .telemetry-content { display:none; }
+    body[data-view="maze"] .panel { top:calc(145px + env(safe-area-inset-top)); max-height:calc(100dvh - 160px - env(safe-area-inset-bottom)); }
+    body[data-view="maze"] #mazeWorldsFrame { height:clamp(500px,68dvh,820px) !important; }
+    body[data-view="maze"] .maze-poster { max-height:220px; }
+    body[data-view="telemetry"] .panel { top:calc(145px + env(safe-area-inset-top)); max-height:calc(100dvh - 160px - env(safe-area-inset-bottom)); }
+    body[data-view="map"] .attribution { bottom:8px; }
+    .map-hint { position:fixed; z-index:450; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom)); padding:9px 13px; border-radius:999px; background:rgba(16,35,31,.9); color:#fff; font-size:12px; white-space:nowrap; border:1px solid #ffffff20; pointer-events:none; }
+    body:not([data-view="map"]) .map-hint { display:none; }
     @media (min-width:700px) { .panel { left:20px; right:auto; bottom:20px; width:440px; max-height:calc(100vh - 100px); } .topbar { left:20px; right:20px; top:20px; } .attribution { bottom:12px; } }
     @media (max-height:720px) { .panel { padding:11px; max-height:48dvh; } .panel-head { margin-bottom:8px; } .steps-card { padding:9px 12px; margin-bottom:8px; } .steps-number { font-size:40px; } .message { margin:7px 2px; } button { min-height:41px; } .metric { padding:7px; } }
+    .main-menu { position:fixed; z-index:650; top:calc(82px + env(safe-area-inset-top)); left:12px; right:12px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:560px; margin:0 auto; }
+    .menu-btn { min-height:54px; padding:8px 5px; border-radius:16px; border:1px solid #ffffff35; color:#fff; background:rgba(16,35,31,.91); box-shadow:0 6px 20px #10231f30; backdrop-filter:blur(12px); font-size:12px; line-height:1.2; }
+    .menu-btn span { display:block; font-size:19px; margin-bottom:3px; }
+    .menu-btn.active { background:var(--accent); border-color:var(--accent); color:#10231f; }
+    body[data-view="map"] .panel { display:none; }
+    body[data-view="telemetry"] .maze-card { display:none; }
+    body[data-view="maze"] .telemetry-content { display:none; }
+    body[data-view="maze"] .panel { top:calc(145px + env(safe-area-inset-top)); max-height:calc(100dvh - 160px - env(safe-area-inset-bottom)); }
+    body[data-view="maze"] #mazeWorldsFrame { height:clamp(500px,68dvh,820px) !important; }
+    body[data-view="maze"] .maze-poster { max-height:220px; }
+    body[data-view="telemetry"] .panel { top:calc(145px + env(safe-area-inset-top)); max-height:calc(100dvh - 160px - env(safe-area-inset-bottom)); }
+    body[data-view="map"] .attribution { bottom:8px; }
+    .map-hint { position:fixed; z-index:450; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom)); padding:9px 13px; border-radius:999px; background:rgba(16,35,31,.9); color:#fff; font-size:12px; white-space:nowrap; border:1px solid #ffffff20; pointer-events:none; }
+    body:not([data-view="map"]) .map-hint { display:none; }
     @media (min-width:700px) { .panel { max-height:calc(100vh - 100px); } }
     @media (max-width:420px) { .panel { left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom)); padding:11px; border-radius:19px; max-height:50dvh; } .topbar { left:8px; right:8px; } .brand { padding:8px 10px; } .status-pill { padding:8px 10px; font-size:11px; } .steps-card { padding:9px 11px; } .steps-icon { padding:8px; font-size:24px; } .mode-btn,.view-btn { min-height:36px; } }
   </style>
 </head>
-<body>
+<body data-view="map">
   <div id="map" aria-label="Map showing your live GPS location"></div>
   <header class="topbar">
     <div class="brand">
@@ -102,7 +130,14 @@
     </div>
     <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Not started</span></div>
   </header>
+  <nav class="main-menu" aria-label="Main menu">
+    <button class="menu-btn active" type="button" data-view-target="map" aria-pressed="true"><span>🗺️</span>Map / Home</button>
+    <button class="menu-btn" type="button" data-view-target="maze" aria-pressed="false"><span>🧩</span>Maze Games</button>
+    <button class="menu-btn" type="button" data-view-target="telemetry" aria-pressed="false"><span>📡</span>Motion Data</button>
+  </nav>
+  <div class="map-hint">Map view · choose a mode above</div>
   <main class="panel">
+    <div class="telemetry-content">
     <div class="panel-head">
       <div><div class="eyebrow">Motion telemetry</div><h1>Track your walk.</h1></div>
       <div class="gps-icon" aria-hidden="true">⌖</div>
@@ -162,6 +197,7 @@
     </div>
     <div class="saved-list" id="savedWalks" aria-label="Saved walks"></div>
 
+    </div><!-- /telemetry-content -->
     <section class="maze-card" aria-label="Maze Worlds game" id="mazeWorldsCard">
       <div class="eyebrow">Integrated bonus game</div>
       <div class="maze-title">✦ Maze Worlds — collect rewards and reach the finish</div>
@@ -192,6 +228,13 @@
   <script>
     (() => {
       const $ = (id) => document.getElementById(id);
+      document.querySelectorAll('[data-view-target]').forEach(btn => btn.addEventListener('click', () => {
+        const view = btn.dataset.viewTarget;
+        document.body.dataset.view = view;
+        document.querySelectorAll('[data-view-target]').forEach(b => { const active = b === btn; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); });
+        if (window.routeLabMap) setTimeout(() => window.routeLabMap.invalidateSize(), 120);
+        if (view === 'maze') { const frame = $('mazeWorldsFrame'); if (frame) setTimeout(() => frame.contentWindow && frame.contentWindow.postMessage({type:'route-lab-resize'}, '*'), 180); }
+      }));
       const startBtn = $('startBtn'), stopBtn = $('stopBtn'), recenterBtn = $('recenterBtn');
       const message = $('message'), statusPill = $('statusPill'), statusText = $('statusText');
       const stepCountEl = $('stepCount'), motionStatus = $('motionStatus');
