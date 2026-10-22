@@ -20,7 +20,7 @@
     .status-pill { border-radius:999px; padding:9px 12px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:7px; white-space:nowrap; }
     .dot { width:7px; height:7px; border-radius:50%; background:#91a39c; }
     .status-pill.live .dot { background:#55ed9a; box-shadow:0 0 0 4px #55ed9a24; }
-    .panel { position:fixed; z-index:500; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); max-width:560px; margin:0 auto; padding:15px; border-radius:24px; color:white; background:var(--panel); border:1px solid var(--line); box-shadow:0 12px 40px #10231f3d; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); max-height:calc(100dvh - 115px - env(safe-area-inset-top)); overflow:auto; }
+    .panel { position:fixed; z-index:500; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); max-width:560px; margin:0 auto; padding:15px; border-radius:24px; color:white; background:var(--panel); border:1px solid var(--line); box-shadow:0 12px 40px #10231f3d; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); max-height:52dvh; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
     .panel-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
     .eyebrow { color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
     h1 { font-size:19px; line-height:1.2; margin:4px 0 0; letter-spacing:-.025em; }
@@ -79,7 +79,7 @@
     .primary { flex:1; background:var(--accent); color:#10231f; }
     .secondary { padding:0 15px; color:white; background:#ffffff12; border:1px solid var(--line); }
     button:disabled { opacity:.45; cursor:not-allowed; }
-    .attribution { position:fixed; z-index:400; bottom:calc(440px + env(safe-area-inset-bottom)); right:8px; max-width:180px; color:#21332e; font-size:10px; text-align:right; text-shadow:0 1px 3px #fff; pointer-events:auto; }
+    .attribution { position:fixed; z-index:400; bottom:8px; right:8px; max-width:180px; color:#21332e; font-size:10px; text-align:right; text-shadow:0 1px 3px #fff; pointer-events:auto; }
     .leaflet-control-attribution { font-size:10px !important; }
     .leaflet-control-zoom { display:none; }
     .user-pin { background:transparent; border:0; }
@@ -88,7 +88,9 @@
     .pin-core { position:absolute; top:8px; left:8px; width:18px; height:18px; border:4px solid white; border-radius:50%; background:#14a66b; box-shadow:0 2px 9px #17382b70; }
     @keyframes pulse { 0%{transform:scale(.7);opacity:.9} 100%{transform:scale(1.8);opacity:0} }
     @media (min-width:700px) { .panel { left:20px; right:auto; bottom:20px; width:440px; max-height:calc(100vh - 100px); } .topbar { left:20px; right:20px; top:20px; } .attribution { bottom:12px; } }
-    @media (max-height:720px) { .panel { padding:11px; } .panel-head { margin-bottom:8px; } .steps-card { padding:9px 12px; margin-bottom:8px; } .steps-number { font-size:40px; } .message { margin:7px 2px; } button { min-height:41px; } .metric { padding:7px; } .attribution { bottom:400px; } }
+    @media (max-height:720px) { .panel { padding:11px; max-height:48dvh; } .panel-head { margin-bottom:8px; } .steps-card { padding:9px 12px; margin-bottom:8px; } .steps-number { font-size:40px; } .message { margin:7px 2px; } button { min-height:41px; } .metric { padding:7px; } }
+    @media (min-width:700px) { .panel { max-height:calc(100vh - 100px); } }
+    @media (max-width:420px) { .panel { left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom)); padding:11px; border-radius:19px; max-height:50dvh; } .topbar { left:8px; right:8px; } .brand { padding:8px 10px; } .status-pill { padding:8px 10px; font-size:11px; } .steps-card { padding:9px 11px; } .steps-icon { padding:8px; font-size:24px; } .mode-btn,.view-btn { min-height:36px; } }
   </style>
 </head>
 <body>
@@ -138,7 +140,7 @@
       <div class="metric"><div class="metric-label">Step distance*</div><div class="metric-value" id="stepDistanceValue">0 <span class="metric-unit">m</span></div></div>
       <div class="metric"><div class="metric-label">GPS distance</div><div class="metric-value" id="gpsDistanceValue">0 <span class="metric-unit">m</span></div></div>
     </section>
-    <div class="steps-note">*Estimated using a 0.70 m average step length; GPS distance is calculated from filtered GPS fixes.</div>
+    <div class="steps-note">*Step distance is an estimate (0.70 m per step). GPS distance/speed ignore low-accuracy fixes and small GPS jitter; buildings and phone movement can still affect results.</div>
     <section class="legend" aria-label="Route visualization legend">
       <div class="legend-title" id="legendTitle">Distance between route dots</div><div class="legend-gradient" id="legendGradient"></div>
       <div class="legend-labels"><span id="legendLow">Shorter · lighter</span><span id="legendHigh">Farther · darker</span></div>
@@ -159,10 +161,20 @@
       <button class="secondary" id="exportWalksBtn" type="button">Export walks</button>
     </div>
     <div class="saved-list" id="savedWalks" aria-label="Saved walks"></div>
+
+    <section class="maze-card" aria-label="Maze Worlds game" id="mazeWorldsCard">
+      <div class="eyebrow">Integrated bonus game</div>
+      <div class="maze-title">✦ Maze Worlds — collect rewards and reach the finish</div>
+      <div class="maze-copy">Choose from the themed mazes, collect rewards, and find the exit. This game is embedded in Route Lab, so you can play without leaving the app.</div>
+      <iframe id="mazeWorldsFrame" title="Maze Worlds game" src="./maze-worlds.html" loading="lazy" style="display:block;width:100%;height:clamp(620px,90vh,980px);border:1px solid #2c536b;border-radius:14px;background:#071321"></iframe>
+    </section>
+
     <section class="maze-card" aria-label="Bonus maze challenge">
       <div class="eyebrow">Bonus challenge</div>
       <div class="maze-title">🧩 Maze Quest — earn extra points</div>
-      <div class="maze-copy">Explore nine themed worlds inspired by the neon maze artwork below. Guide your player from A (START) to B (FINISH) using the arrow buttons, keyboard arrows, or touchscreen swipes. Complete each world once per session to earn <strong>25 bonus points</strong>.</div>
+      <div class="maze-copy">Explore nine themed worlds inspired by the neon maze artwork below. Choose manual controls, or activate Step-to-Move mode so each detected real step moves your player one cell in the selected direction. Reach B (FINISH) to earn <strong>25 bonus points</strong>.</div>
+      <div class="maze-actions" style="margin:10px 0"><button class="primary" id="mazeStepModeBtn" type="button" aria-pressed="false">Enable Step-to-Move</button><span id="mazeDirectionLabel" class="steps-note">Direction: down</span></div>
+      <div class="maze-copy" style="border:1px solid #fbbf2460;border-radius:10px;padding:9px;background:#f59e0b12"><strong>Safety:</strong> Use this mode only in a clear, open space. Stay in place and march gently; do not walk toward obstacles while looking at the screen. Select a direction with the arrows, then each detected step advances one maze cell in that direction. You can turn this mode off anytime.</div>
       <img class="maze-poster" src="maze-poster.png" alt="Nine high-quality neon fantasy mazes: Pyramid, Mayan Temple, Space, Halloween, Hexagon Magic, Rectangle Portal, Star Magic, Octagon Magic, and Oval Portal" loading="lazy">
       <select class="maze-select" id="mazeSelect" aria-label="Choose a maze">
         <option value="circle">🏺 Pyramid Maze</option><option value="square">🌿 Mayan Temple Maze</option><option value="triangle">🚀 Space Maze</option><option value="hexagon">🎃 Halloween Maze</option><option value="rectangle">🔮 Hexagon Magic Maze</option><option value="star">🌀 Rectangle Portal Maze</option><option value="heart">⭐ Star Magic Maze</option><option value="octagon">💎 Octagon Magic Maze</option><option value="oval">🪐 Oval Portal Maze</option>
@@ -189,8 +201,10 @@
       let recordingMode = 'steps', timeDotTimer = null, mapView = 'dots';
       const routePoints = [];
       const STEPS_PER_ROUTE_DOT = 5, MAX_ROUTE_ACCURACY_METERS = 25;
-      const STEP_THRESHOLD = 0.48;
-      const STEP_COOLDOWN_MS = 280;
+      const STEP_THRESHOLD = 1.15;
+      const STEP_COOLDOWN_MS = 420;
+      const ESTIMATED_STEP_LENGTH_METERS = 0.70;
+      let previousGpsAccuracy = null;
       const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([25.033, 121.5654], 13);
       const dotsLayer = L.layerGroup().addTo(map), routeLinesLayer = L.layerGroup().addTo(map);
       let heatLayer = null;
@@ -212,16 +226,17 @@
 
       function updateTotals() {
         $('totalSteps').textContent = stepCount.toLocaleString();
-        $('totalDistance').innerHTML = totalDistanceMeters >= 1000
-          ? (totalDistanceMeters / 1000).toFixed(2) + ' <span class="summary-unit">km</span>'
-          : Math.round(totalDistanceMeters) + ' <span class="summary-unit">m</span>';
+        const routeMeters = gpsDistanceMeters;
+        $('totalDistance').innerHTML = routeMeters >= 1000
+          ? (routeMeters / 1000).toFixed(2) + ' <span class="summary-unit">km</span>'
+          : Math.round(routeMeters) + ' <span class="summary-unit">m</span>';
         updateFitnessMetrics();
       }
       function formatDistance(m) {
         return m >= 1000 ? `${(m/1000).toFixed(2)} <span class="metric-unit">km</span>` : `${Math.round(m)} <span class="metric-unit">m</span>`;
       }
       function updateFitnessMetrics() {
-        $('stepDistanceValue').innerHTML = formatDistance(stepCount * 0.70);
+        $('stepDistanceValue').innerHTML = formatDistance(stepCount * ESTIMATED_STEP_LENGTH_METERS);
         $('gpsDistanceValue').innerHTML = formatDistance(gpsDistanceMeters);
         $('speedValue').innerHTML = `${(speedMetersPerSecond * 3.6).toFixed(1)} <span class="metric-unit">km/h</span>`;
         if (speedMetersPerSecond > 0.15 && gpsDistanceMeters >= 20) {
@@ -421,19 +436,40 @@
         const c = position.coords;
         const lat = c.latitude, lon = c.longitude, acc = c.accuracy;
         const now = position.timestamp || Date.now();
-        if (Number.isFinite(acc) && acc <= MAX_ROUTE_ACCURACY_METERS) {
+        // Use only reasonably accurate GPS fixes and discard jitter-sized movement.
+        // Accuracy-aware noise floor prevents stationary GPS drift inflating distance/speed.
+        if (Number.isFinite(acc) && acc > 0 && acc <= MAX_ROUTE_ACCURACY_METERS) {
           const current = [lat, lon];
           if (lastDistanceFix) {
             const delta = haversine(lastDistanceFix, current);
             const dt = (now - lastDistanceFixTime) / 1000;
-            if (delta <= 150 && dt > 0.5) {
+            const noiseFloor = Math.max(3.0, ((previousGpsAccuracy || acc) + acc) * 0.25);
+            const instantSpeed = dt > 0 ? delta / dt : Infinity;
+            // Walking/running plausibility filter. Rejected fixes do not add distance.
+            if (dt >= 0.8 && delta > noiseFloor && delta <= 80 && instantSpeed >= 0.25 && instantSpeed <= 4.0) {
               gpsDistanceMeters += delta;
-              const instantSpeed = delta / dt;
-              speedMetersPerSecond = speedMetersPerSecond * 0.65 + Math.min(instantSpeed, 4.5) * 0.35;
-            } else if (delta > 150) speedMetersPerSecond = 0;
+              speedMetersPerSecond = speedMetersPerSecond === 0
+                ? instantSpeed
+                : speedMetersPerSecond * 0.75 + instantSpeed * 0.25;
+              lastDistanceFix = current;
+              lastDistanceFixTime = now;
+              previousGpsAccuracy = acc;
+            } else if (dt > 4 || delta > 80 || (dt > 0 && instantSpeed > 4.0)) {
+              // Re-anchor after gaps or implausible jumps without counting the jump.
+              lastDistanceFix = current;
+              lastDistanceFixTime = now;
+              previousGpsAccuracy = acc;
+              if (dt > 4 || delta > 80) speedMetersPerSecond = 0;
+            }
+            // Small GPS jitter is ignored and does not move the distance anchor.
+          } else {
+            lastDistanceFix = current;
+            lastDistanceFixTime = now;
+            previousGpsAccuracy = acc;
           }
-          lastDistanceFix = current; lastDistanceFixTime = now;
-          updateFitnessMetrics();
+          updateTotals();
+        } else if (acc > MAX_ROUTE_ACCURACY_METERS) {
+          // Do not let low-quality fixes influence distance or speed.
         }
         lastPosition = [lat, lon];
         $('lat').textContent = lat.toFixed(6);
@@ -526,10 +562,13 @@
         }
         const isPeak = previousFiltered > STEP_THRESHOLD &&
           previousFiltered >= olderFiltered &&
-          previousFiltered > filteredMagnitude;
+          previousFiltered > filteredMagnitude &&
+          (previousFiltered - Math.min(olderFiltered, filteredMagnitude)) > 0.22;
         if (isPeak && now - lastStepAt >= STEP_COOLDOWN_MS) {
           stepCount++;
           stepCountEl.textContent = stepCount.toLocaleString();
+          if (mazeStepMode && !mazeWon) moveMaze(mazeStepDirection, true);
+          const mazeFrame = $('mazeWorldsFrame'); if (mazeFrame && mazeFrame.contentWindow) mazeFrame.contentWindow.postMessage({ type: 'route-lab-step' }, '*');
           updateTotals();
           lastStepAt = now;
           if (recordingMode === 'steps' && stepCount % STEPS_PER_ROUTE_DOT === 0) {
@@ -635,6 +674,7 @@
     };
     const mazeSize=13;
     let mazeGrid=[], mazePlayer={x:0,y:0}, mazeWon=false, mazePoints=0, mazeCompleted=new Set(), mazeSolution=[], showMazeSolution=false;
+    let mazeStepMode=false, mazeStepDirection='down';
     function neighbors(x,y){
       const c=mazeGrid[y]?.[x]; if(!c)return [];
       const out=[];
@@ -684,17 +724,18 @@
       mazeCtx.fillStyle='#fff';mazeCtx.font='bold 10px system-ui';mazeCtx.textAlign='center';mazeCtx.fillText('A',cs/2,cs*.66);mazeCtx.fillText('B',w-cs/2,w-cs*.68);
       mazeCtx.beginPath();mazeCtx.arc((mazePlayer.x+.5)*cs,(mazePlayer.y+.5)*cs,cs*.27,0,Math.PI*2);mazeCtx.fillStyle='#111827';mazeCtx.fill();mazeCtx.strokeStyle='#fff';mazeCtx.lineWidth=2;mazeCtx.stroke();
     }
-    function moveMaze(dir){if(mazeWon)return;const c=mazeGrid[mazePlayer.y]?.[mazePlayer.x];if(!c)return;
-      if(dir==='up'&&!c.t)mazePlayer.y--;else if(dir==='right'&&!c.r)mazePlayer.x++;else if(dir==='down'&&!c.b)mazePlayer.y++;else if(dir==='left'&&!c.l)mazePlayer.x--;else return;
+    function moveMaze(dir, fromPhysicalStep=false){if(mazeWon)return;const c=mazeGrid[mazePlayer.y]?.[mazePlayer.x];if(!c)return;
+      if(dir==='up'&&!c.t)mazePlayer.y--;else if(dir==='right'&&!c.r)mazePlayer.x++;else if(dir==='down'&&!c.b)mazePlayer.y++;else if(dir==='left'&&!c.l)mazePlayer.x--;else { if(fromPhysicalStep) $('mazeStatus').textContent='Wall ahead — choose another direction.'; return; }
       if(mazePlayer.x===mazeSize-1&&mazePlayer.y===mazeSize-1){mazeWon=true;const key=$('mazeSelect').value;if(!mazeCompleted.has(key)){mazeCompleted.add(key);mazePoints+=25;$('mazePoints').textContent=mazePoints;$('mazeStatus').textContent='Maze solved! +25 bonus points 🎉';}else $('mazeStatus').textContent='Maze solved! You already earned points for this maze.';}
       drawMaze();
     }
     $('showSolutionBtn').addEventListener('click',()=>{showMazeSolution=!showMazeSolution;$('showSolutionBtn').textContent=showMazeSolution?'Hide solution':'Show solution';$('showSolutionBtn').setAttribute('aria-pressed',String(showMazeSolution));drawMaze();});
-    document.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',()=>moveMaze(btn.dataset.move)));
     window.addEventListener('keydown',e=>{if(!document.querySelector('.maze-card:hover'))return;const k={ArrowUp:'up',ArrowRight:'right',ArrowDown:'down',ArrowLeft:'left'}[e.key];if(k){e.preventDefault();moveMaze(k);}});
     let mazeTouch=null; mazeCanvas.addEventListener('touchstart',e=>{const t=e.changedTouches[0];mazeTouch={x:t.clientX,y:t.clientY};},{passive:true});
     mazeCanvas.addEventListener('touchend',e=>{if(!mazeTouch)return;const t=e.changedTouches[0],dx=t.clientX-mazeTouch.x,dy=t.clientY-mazeTouch.y;mazeTouch=null;if(Math.max(Math.abs(dx),Math.abs(dy))<18)return;moveMaze(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'));},{passive:true});
     $('mazeSelect').addEventListener('change',generateMaze); $('newMazeBtn').addEventListener('click',generateMaze); $('resetMazeBtn').addEventListener('click',()=>{mazePlayer={x:0,y:0};mazeWon=false;$('mazeStatus').textContent='Try again — START to FINISH!';drawMaze();});
+    $('mazeStepModeBtn').addEventListener('click',()=>{mazeStepMode=!mazeStepMode; const mwf=$('mazeWorldsFrame'); if(mwf&&mwf.contentWindow) mwf.contentWindow.postMessage({type:'route-lab-physical-mode',enabled:mazeStepMode},'*');$('mazeStepModeBtn').textContent=mazeStepMode?'Disable Step-to-Move':'Enable Step-to-Move';$('mazeStepModeBtn').setAttribute('aria-pressed',String(mazeStepMode));$('mazeStatus').textContent=mazeStepMode?'Step-to-Move is ON. Select a direction, then each detected step advances one cell.':'Manual maze controls are active.';});
+    document.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',()=>{mazeStepDirection=btn.dataset.move;$('mazeDirectionLabel').textContent='Direction: '+mazeStepDirection;if(!mazeStepMode)moveMaze(mazeStepDirection);}));
     generateMaze();
 
     })();
