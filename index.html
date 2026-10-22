@@ -172,8 +172,8 @@
     <section class="maze-card" aria-label="Bonus maze challenge">
       <div class="eyebrow">Bonus challenge</div>
       <div class="maze-title">🧩 Maze Quest — earn extra points</div>
-      <div class="maze-copy">Explore nine themed worlds inspired by the neon maze artwork below. Choose manual controls, or activate Step-to-Move mode so each detected real step moves your player one cell in the selected direction. Reach B (FINISH) to earn <strong>25 bonus points</strong>.</div>
-      <div class="maze-actions" style="margin:10px 0"><button class="primary" id="mazeStepModeBtn" type="button" aria-pressed="false">Enable Step-to-Move</button><span id="mazeDirectionLabel" class="steps-note">Direction: down</span></div>
+      <div class="maze-copy">Explore nine themed worlds inspired by the neon maze artwork below. Choose Walk-to-Play to earn one maze move per detected step, or Step-to-Move to advance one maze cell per detected step in the selected direction. Step-to-Move can record your GPS path and show it on the real map at the end. Reach B (FINISH) to earn <strong>25 bonus points</strong>.</div>
+      <div class="maze-actions" style="margin:10px 0"><button class="primary" id="mazeWalkModeBtn" type="button" aria-pressed="false">Enable Walk-to-Play</button><button class="secondary" id="mazeStepModeBtn" type="button" aria-pressed="false">Enable Step-to-Move</button><span id="mazeDirectionLabel" class="steps-note">Direction: down</span></div>
       <div class="maze-copy" style="border:1px solid #fbbf2460;border-radius:10px;padding:9px;background:#f59e0b12"><strong>Safety:</strong> Use this mode only in a clear, open space. Stay in place and march gently; do not walk toward obstacles while looking at the screen. Select a direction with the arrows, then each detected step advances one maze cell in that direction. You can turn this mode off anytime.</div>
       <img class="maze-poster" src="maze-poster.png" alt="Nine high-quality neon fantasy mazes: Pyramid, Mayan Temple, Space, Halloween, Hexagon Magic, Rectangle Portal, Star Magic, Octagon Magic, and Oval Portal" loading="lazy">
       <select class="maze-select" id="mazeSelect" aria-label="Choose a maze">
@@ -200,6 +200,7 @@
       let lastRoutePoint = null, totalDistanceMeters = 0, wakeLock = null;
       let recordingMode = 'steps', timeDotTimer = null, mapView = 'dots';
       const routePoints = [];
+      let mazeWalkGpsPoints = [], mazeResultLayer = null, walkToPlayMode = false;
       const STEPS_PER_ROUTE_DOT = 5, MAX_ROUTE_ACCURACY_METERS = 25;
       const STEP_THRESHOLD = 1.15;
       const STEP_COOLDOWN_MS = 420;
@@ -433,6 +434,11 @@
       }
       function updatePosition(position) {
         window.lastGpsPositionObject = position;
+        if (mazeStepMode && position.coords.accuracy <= MAX_ROUTE_ACCURACY_METERS) {
+          const mp = [position.coords.latitude, position.coords.longitude];
+          const prev = mazeWalkGpsPoints[mazeWalkGpsPoints.length - 1];
+          if (!prev || haversine(prev, mp) >= 2) mazeWalkGpsPoints.push(mp);
+        }
         const c = position.coords;
         const lat = c.latitude, lon = c.longitude, acc = c.accuracy;
         const now = position.timestamp || Date.now();
@@ -567,8 +573,7 @@
         if (isPeak && now - lastStepAt >= STEP_COOLDOWN_MS) {
           stepCount++;
           stepCountEl.textContent = stepCount.toLocaleString();
-          if (mazeStepMode && !mazeWon) moveMaze(mazeStepDirection, true);
-          const mazeFrame = $('mazeWorldsFrame'); if (mazeFrame && mazeFrame.contentWindow) mazeFrame.contentWindow.postMessage({ type: 'route-lab-step' }, '*');
+          if (mazeStepMode || walkToPlayMode) { const mazeFrame = $('mazeWorldsFrame'); if (mazeFrame && mazeFrame.contentWindow) mazeFrame.contentWindow.postMessage({ type: 'route-lab-step-earned', count: 1, direction: mazeStepDirection }, '*'); }
           updateTotals();
           lastStepAt = now;
           if (recordingMode === 'steps' && stepCount % STEPS_PER_ROUTE_DOT === 0) {
@@ -734,8 +739,10 @@
     let mazeTouch=null; mazeCanvas.addEventListener('touchstart',e=>{const t=e.changedTouches[0];mazeTouch={x:t.clientX,y:t.clientY};},{passive:true});
     mazeCanvas.addEventListener('touchend',e=>{if(!mazeTouch)return;const t=e.changedTouches[0],dx=t.clientX-mazeTouch.x,dy=t.clientY-mazeTouch.y;mazeTouch=null;if(Math.max(Math.abs(dx),Math.abs(dy))<18)return;moveMaze(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'));},{passive:true});
     $('mazeSelect').addEventListener('change',generateMaze); $('newMazeBtn').addEventListener('click',generateMaze); $('resetMazeBtn').addEventListener('click',()=>{mazePlayer={x:0,y:0};mazeWon=false;$('mazeStatus').textContent='Try again — START to FINISH!';drawMaze();});
-    $('mazeStepModeBtn').addEventListener('click',()=>{mazeStepMode=!mazeStepMode; const mwf=$('mazeWorldsFrame'); if(mwf&&mwf.contentWindow) mwf.contentWindow.postMessage({type:'route-lab-physical-mode',enabled:mazeStepMode},'*');$('mazeStepModeBtn').textContent=mazeStepMode?'Disable Step-to-Move':'Enable Step-to-Move';$('mazeStepModeBtn').setAttribute('aria-pressed',String(mazeStepMode));$('mazeStatus').textContent=mazeStepMode?'Step-to-Move is ON. Select a direction, then each detected step advances one cell.':'Manual maze controls are active.';});
-    document.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',()=>{mazeStepDirection=btn.dataset.move;$('mazeDirectionLabel').textContent='Direction: '+mazeStepDirection;if(!mazeStepMode)moveMaze(mazeStepDirection);}));
+    $('mazeWalkModeBtn').addEventListener('click',()=>{walkToPlayMode=!walkToPlayMode;if(walkToPlayMode){mazeStepMode=false;$('mazeStepModeBtn').textContent='Enable Step-to-Move';$('mazeStepModeBtn').setAttribute('aria-pressed','false');}const mwf=$('mazeWorldsFrame');if(mwf&&mwf.contentWindow)mwf.contentWindow.postMessage({type:'route-lab-physical-mode',enabled:false},'*');$('mazeWalkModeBtn').textContent=walkToPlayMode?'Disable Walk-to-Play':'Enable Walk-to-Play';$('mazeWalkModeBtn').setAttribute('aria-pressed',String(walkToPlayMode));$('mazeStatus').textContent=walkToPlayMode?'Walk-to-Play is ON: each detected step earns one move. Choose maze directions to spend them.':'Walk-to-Play is OFF.';});
+    $('mazeStepModeBtn').addEventListener('click',()=>{mazeStepMode=!mazeStepMode;if(mazeStepMode){walkToPlayMode=false;$('mazeWalkModeBtn').textContent='Enable Walk-to-Play';$('mazeWalkModeBtn').setAttribute('aria-pressed','false');mazeWalkGpsPoints=[];} const mwf=$('mazeWorldsFrame'); if(mwf&&mwf.contentWindow) mwf.contentWindow.postMessage({type:'route-lab-physical-mode',enabled:mazeStepMode},'*');$('mazeStepModeBtn').textContent=mazeStepMode?'Disable Step-to-Move':'Enable Step-to-Move';$('mazeStepModeBtn').setAttribute('aria-pressed',String(mazeStepMode));$('mazeStatus').textContent=mazeStepMode?'Step-to-Move is ON. Select a direction, then walk gently that way; each detected step advances one maze cell. Keep GPS running to record your real-world path.':'Step-to-Move is OFF.';});
+    window.addEventListener('message',e=>{if(!e.data)return;if(e.data.type==='maze-direction-selected'){mazeStepDirection=e.data.direction;$('mazeDirectionLabel').textContent='Direction: '+mazeStepDirection;}if(e.data.type==='maze-completed'){if(mazeStepMode&&mazeWalkGpsPoints.length>=2){if(mazeResultLayer)map.removeLayer(mazeResultLayer);mazeResultLayer=L.polyline(mazeWalkGpsPoints,{color:'#b34dff',weight:7,opacity:.9,dashArray:'3 8'}).addTo(map);map.fitBounds(mazeResultLayer.getBounds(),{padding:[35,35]});message.textContent=`Maze completed: ${e.data.mazeName}. Your real-world GPS path is shown in purple on the map (${mazeWalkGpsPoints.length} recorded positions).`;document.querySelector('#map').scrollIntoView({behavior:'smooth',block:'center'});}else{message.textContent=`Maze completed: ${e.data.mazeName}. ${mazeStepMode?'Keep GPS running and walk with good GPS accuracy to record the real-world path.':'Your maze score is saved in this session.'}`;}}});
+    document.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',()=>{mazeStepDirection=btn.dataset.move;$('mazeDirectionLabel').textContent='Direction: '+mazeStepDirection;if(mazeStepMode){const mwf=$('mazeWorldsFrame');if(mwf&&mwf.contentWindow)mwf.contentWindow.postMessage({type:'maze-direction-selected',direction:mazeStepDirection},'*');}else moveMaze(mazeStepDirection);}));
     generateMaze();
 
     })();
