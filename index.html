@@ -87,10 +87,10 @@
     .pin-pulse { position:absolute; inset:0; border-radius:50%; background:#16875b30; animation:pulse 2s infinite; }
     .pin-core { position:absolute; top:8px; left:8px; width:18px; height:18px; border:4px solid white; border-radius:50%; background:#14a66b; box-shadow:0 2px 9px #17382b70; }
     @keyframes pulse { 0%{transform:scale(.7);opacity:.9} 100%{transform:scale(1.8);opacity:0} }
-    .main-menu { position:fixed; z-index:650; top:calc(82px + env(safe-area-inset-top)); left:12px; right:12px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:560px; margin:0 auto; }
-    .menu-btn { min-height:54px; padding:8px 5px; border-radius:16px; border:1px solid #ffffff35; color:#fff; background:rgba(16,35,31,.91); box-shadow:0 6px 20px #10231f30; backdrop-filter:blur(12px); font-size:12px; line-height:1.2; }
+    .main-menu { position:fixed; z-index:650; top:calc(82px + env(safe-area-inset-top)); left:12px; right:12px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:560px; margin:0 auto; padding:68px 10px 10px; border:1px solid #c5b6ff65; border-radius:22px; overflow:hidden; background:linear-gradient(180deg,rgba(9,12,34,.12) 0%,rgba(9,12,34,.45) 48%,rgba(9,12,34,.88) 100%),url("moonlit-garden-background.png") center 38%/cover no-repeat; box-shadow:0 12px 36px #080b244d; }
+    .menu-btn { min-height:54px; padding:8px 5px; border-radius:16px; border:1px solid #ffffff35; color:#fff; background:rgba(12,16,42,.82); box-shadow:0 6px 20px #080b2440; backdrop-filter:blur(12px); font-size:12px; line-height:1.2; }
     .menu-btn span { display:block; font-size:19px; margin-bottom:3px; }
-    .menu-btn.active { background:var(--accent); border-color:var(--accent); color:#10231f; }
+    .menu-btn.active { background:#d9c7ff; border-color:#e7ddff; color:#19122e; }
     body[data-view="map"] .panel { display:none; }
     body[data-view="telemetry"] .maze-card { display:none; }
     body[data-view="maze"] .telemetry-content { display:none; }
@@ -103,10 +103,10 @@
     body:not([data-view="map"]) .map-hint { display:none; }
     @media (min-width:700px) { .panel { left:20px; right:auto; bottom:20px; width:440px; max-height:calc(100vh - 100px); } .topbar { left:20px; right:20px; top:20px; } .attribution { bottom:12px; } }
     @media (max-height:720px) { .panel { padding:11px; max-height:48dvh; } .panel-head { margin-bottom:8px; } .steps-card { padding:9px 12px; margin-bottom:8px; } .steps-number { font-size:40px; } .message { margin:7px 2px; } button { min-height:41px; } .metric { padding:7px; } }
-    .main-menu { position:fixed; z-index:650; top:calc(82px + env(safe-area-inset-top)); left:12px; right:12px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:560px; margin:0 auto; }
-    .menu-btn { min-height:54px; padding:8px 5px; border-radius:16px; border:1px solid #ffffff35; color:#fff; background:rgba(16,35,31,.91); box-shadow:0 6px 20px #10231f30; backdrop-filter:blur(12px); font-size:12px; line-height:1.2; }
+    .main-menu { position:fixed; z-index:650; top:calc(82px + env(safe-area-inset-top)); left:12px; right:12px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:560px; margin:0 auto; padding:68px 10px 10px; border:1px solid #c5b6ff65; border-radius:22px; overflow:hidden; background:linear-gradient(180deg,rgba(9,12,34,.12) 0%,rgba(9,12,34,.45) 48%,rgba(9,12,34,.88) 100%),url("moonlit-garden-background.png") center 38%/cover no-repeat; box-shadow:0 12px 36px #080b244d; }
+    .menu-btn { min-height:54px; padding:8px 5px; border-radius:16px; border:1px solid #ffffff35; color:#fff; background:rgba(12,16,42,.82); box-shadow:0 6px 20px #080b2440; backdrop-filter:blur(12px); font-size:12px; line-height:1.2; }
     .menu-btn span { display:block; font-size:19px; margin-bottom:3px; }
-    .menu-btn.active { background:var(--accent); border-color:var(--accent); color:#10231f; }
+    .menu-btn.active { background:#d9c7ff; border-color:#e7ddff; color:#19122e; }
     body[data-view="map"] .panel { display:none; }
     body[data-view="telemetry"] .maze-card { display:none; }
     body[data-view="maze"] .telemetry-content { display:none; }
@@ -118,7 +118,7 @@
     .map-hint { position:fixed; z-index:450; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom)); padding:9px 13px; border-radius:999px; background:rgba(16,35,31,.9); color:#fff; font-size:12px; white-space:nowrap; border:1px solid #ffffff20; pointer-events:none; }
     body:not([data-view="map"]) .map-hint { display:none; }
     @media (min-width:700px) { .panel { max-height:calc(100vh - 100px); } }
-    @media (max-width:420px) { .panel { left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom)); padding:11px; border-radius:19px; max-height:50dvh; } .topbar { left:8px; right:8px; } .brand { padding:8px 10px; } .status-pill { padding:8px 10px; font-size:11px; } .steps-card { padding:9px 11px; } .steps-icon { padding:8px; font-size:24px; } .mode-btn,.view-btn { min-height:36px; } }
+    @media (max-width:420px) { .main-menu { top:calc(82px + env(safe-area-inset-top)); padding:58px 7px 7px; gap:5px; } .menu-btn { min-height:49px; font-size:11px; border-radius:12px; } .menu-btn span { font-size:17px; } .panel { left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom)); padding:11px; border-radius:19px; max-height:50dvh; } .topbar { left:8px; right:8px; } .brand { padding:8px 10px; } .status-pill { padding:8px 10px; font-size:11px; } .steps-card { padding:9px 11px; } .steps-icon { padding:8px; font-size:24px; } .mode-btn,.view-btn { min-height:36px; } }
   </style>
 </head>
 <body data-view="map">
